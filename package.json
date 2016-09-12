@@ -1,0 +1,22 @@
+{
+  "name": "lambda-request-meetup",
+  "version": "0.0.1",
+  "description": "make request to meetup and obtain the events open",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test/test"
+  },
+  "author": "J.C",
+  "license": "MIT",
+  "devDependencies": {
+    "aws-lambda-testing": "0.0.2",
+    "eslint": "^3.5.0",
+    "eslint-config-standard": "^6.0.0",
+    "eslint-plugin-promise": "^2.0.1",
+    "eslint-plugin-standard": "^2.0.0",
+    "mocha": "^3.0.2"
+  },
+  "dependencies": {
+    "request": "^2.74.0"
+  }
+}
