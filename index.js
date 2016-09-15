@@ -4,12 +4,9 @@ let request = require('request')
 exports.handler = function (_params, ctx, cb) {
   try {
     let params = {
-      method: 'GET',
+      method: _params.method || 'GET',
       uri: 'https://api.meetup.com/' +
-      (_params.path ? _params.path.join('/') : '2/open_events'),
-      qs: {
-
-      }
+      (_params.path ? _params.path.join('/') : '2/open_events')
     }
 
     let qs = {}
@@ -102,28 +99,17 @@ exports.handler = function (_params, ctx, cb) {
     // A valid US zip code, limits the returned groups to those within radius miles
     _params.key && (qs.key = _params.key)
     params.qs = qs
-    request(params).on('response', function (response) {
-      let res = ''
-      response.on('data', function (data) {
-        res = res + data.toString()
-      })
-        .on('end', function () {
-          let message
-          try {
-            message = JSON.parse(res)
-          } catch (err) {
-            message = res
-          }
-          cb(null, message.results || message)
-        })
-        .on('error', function (error) {
-          console.error('error listened : ', error)
-          cb(error, null)
-        })
-    })
-    .on('error', function (error) {
-      console.error('error in request', error)
-      cb(error, null)
+    console.log('params : ', params)
+    request(params, function (err, res, body) {
+      let message
+      try {
+        message = JSON.parse(body)
+      } catch (err) {
+        message = body
+      }
+      if (message.problem)console.log('problem : ', message.problem, 'details : ', message.details)
+      let response = message.results || message
+      cb(err, response)
     })
   } catch (err) {
     console.error('error in function lambda', err)

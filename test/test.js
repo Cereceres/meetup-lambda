@@ -9,11 +9,9 @@ describe('test to lambda request', function () {
         .call({
           key: '1d1b3e62755f203360545da40424f2',
           zip: 10704
-        }, function (error, res) { // The call function can receive the params and callback
-          // to use in the hadler to test
+        }, function (error, res) {
           assert(!error)
           assert(res.length)
-          // the return object is passed to the promise resolving
         })
         .then(done)
         .catch(done)
@@ -23,10 +21,23 @@ describe('test to lambda request', function () {
         .call({
           zip: 10704
         }, function (error, res) { // The call function can receive the params and callback
-          // to use in the hadler to test
           assert(!error)
           assert(res.code === 'not_authorized')
-          // the return object is passed to the promise resolving
+        })
+        .then(done)
+        .catch(done)
+  })
+
+  it('if city var is given obtain the correct result', function (done) {
+    awsTest.addHandler(handler)
+        .call({
+          key: '1d1b3e62755f203360545da40424f2',
+          city: 'New York',
+          state: 'NY',
+          country: 'us'
+        }, function (error, res) {
+          assert(!error)
+          assert(res)
         })
         .then(done)
         .catch(done)
