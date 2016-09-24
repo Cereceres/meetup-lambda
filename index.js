@@ -1,12 +1,10 @@
 'use strict'
-let request = require('request')
-
+var http = require('http')
 exports.handler = function (_params, ctx, cb) {
   try {
     let params = {
       method: _params.method || 'GET',
-      uri: 'https://api.meetup.com/' +
-      (_params.path ? _params.path.join('/') : '2/open_events')
+      uri: 'api.meetup.com'
     }
 
     let qs = {}
@@ -99,18 +97,43 @@ exports.handler = function (_params, ctx, cb) {
     // A valid US zip code, limits the returned groups to those within radius miles
     _params.key && (qs.key = _params.key)
     params.qs = qs
-    console.log('params : ', params)
-    request(params, function (err, res, body) {
-      let message
-      try {
-        message = JSON.parse(body)
-      } catch (err) {
-        message = body
-      }
-      if (message.problem)console.log('problem : ', message.problem, 'details : ', message.details)
-      let response = message.results || message
-      cb(err, response)
-    })
+    var options = {
+      host: params.uri,
+      method: params.method
+    }
+    options.path = '/' + (_params.path ? _params.path.join('/') : '2/open_events') +
+    Object.keys(params.qs).reduce((previous, current) => {
+      return previous + current + '=' + params.qs[current].toString().replace(/\s/g, '+') + '&'
+    }, '?')
+    options.path = options.path.slice(0, options.path.length - 1)
+    console.log('params : ', options)
+    let callback = function (response) {
+      let str = ''
+
+  // another chunk of data has been recieved, so append it to `str`
+      response.on('data', function (chunk) {
+        str += chunk
+      })
+
+  // the whole response has been recieved, so we just print it out here
+      response.on('end', function () {
+        let message
+        try {
+          message = JSON.parse(str)
+        } catch (err) {
+          message = str
+        }
+        if (message.problem)console.log('problem : ', message.problem, 'details : ', message.details)
+        let response = message.results || message
+        cb(null, response)
+      })
+
+      response.on('error', function (error) {
+        cb(error, null)
+      })
+    }
+
+    http.request(options, callback).end()
   } catch (err) {
     console.error('error in function lambda', err)
     cb(err, null)

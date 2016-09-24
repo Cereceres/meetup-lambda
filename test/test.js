@@ -11,6 +11,7 @@ describe('test to lambda request', function () {
           zip: 10704
         }, function (error, res) {
           assert(!error)
+          console.log('res', res[0])
           assert(res.length)
         })
         .then(done)
